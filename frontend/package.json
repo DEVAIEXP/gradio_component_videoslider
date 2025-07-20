@@ -1,0 +1,51 @@
+{
+  "name": "gradio_videoslider",
+  "version": "0.1.0",
+  "description": "A video slider component for Gradio to compare two videos.",
+  "type": "module",
+  "author": "",
+  "license": "Apache-2.0",
+  "private": false,
+  "dependencies": {
+    "d3-drag": "^3.0.0",
+    "d3-selection": "^3.0.0",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-selection": "^3.0.11",
+    "@ffmpeg/ffmpeg": "^0.12.7",
+    "@ffmpeg/util": "^0.12.1",
+    "hls.js": "^1.5.13",
+    "mrmime": "^2.0.0",
+    "@gradio/atoms": "0.16.3",
+    "@gradio/client": "1.15.5",
+    "@gradio/icons": "0.12.0",
+    "@gradio/image": "0.22.12",
+    "@gradio/statustracker": "0.10.14",
+    "@gradio/upload": "0.16.10",
+    "@gradio/utils": "0.10.2",
+    "@gradio/wasm": "0.18.1"
+  },
+  "devDependencies": {
+    "@gradio/preview": "0.14.0"
+  },
+  "exports": {
+    ".": {
+      "gradio": "./Index.svelte",
+      "svelte": "./dist/Index.svelte",
+      "types": "./dist/Index.svelte.d.ts"
+    },
+    "./example": {
+      "gradio": "./Example.svelte",
+      "svelte": "./dist/Example.svelte",
+      "types": "./dist/Example.svelte.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "svelte": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gradio-app/gradio.git",
+    "directory": "js/videoslider"
+  }
+}
