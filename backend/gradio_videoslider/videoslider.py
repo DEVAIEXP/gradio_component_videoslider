@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Literal, Tuple
 
 from gradio_client import handle_file
 from gradio_client.documentation import document
@@ -14,24 +14,24 @@ from gradio.events import Events
 
 class VideoSliderData(GradioRootModel):
     """
-    Data model for the VideoSlider component. Represents the data structure
-    sent between the frontend and backend, which is a tuple of two FileData objects.
+    Pydantic model for the data structure sent between the frontend and backend.
+    It represents a tuple of two (optional) FileData objects.
     """
     root: Tuple[FileData | None, FileData | None]
 
-# Type alias for the value passed to or returned from a user's function.
-# It's a tuple of two file paths (string or Path object).
+# Type alias for the value that the user's Python function will receive or return.
+# It is a tuple of two (optional) file paths.
 VideoSliderValue = Tuple[str | Path | None, str | Path | None]
 
 @document()
 class VideoSlider(Component):
     """
     A custom Gradio component to display a side-by-side video comparison with a slider.
-    It can be used as both an input (uploading two videos) and an output (displaying two videos).
+    Can be used as an input (for uploading two videos) or as an output (for displaying two videos).
     """
     # The data model used for communication with the frontend.
     data_model = VideoSliderData
-    # The events that this component can trigger.
+    # A list of events that this component supports.
     EVENTS = [Events.change, Events.upload, Events.clear]
 
     def __init__(
@@ -52,7 +52,9 @@ class VideoSlider(Component):
         elem_classes: List[str] | str | None = None,
         position: int = 50,
         show_download_button: bool = True,
+        show_mute_button: bool = True,
         show_fullscreen_button: bool = True,
+        video_mode: Literal["upload", "preview"] = "preview",
         autoplay: bool = False,
         loop: bool = False,
     ):
@@ -60,23 +62,38 @@ class VideoSlider(Component):
         Initializes the VideoSlider component.
 
         Parameters:
-            value: A tuple of two video file paths or URLs to display initially.
-            height: The height of the component in pixels.
-            width: The width of the component in pixels.
-            label: The label for this component.
-            position: The initial position of the slider, from 0 to 100.
-            autoplay: If True, the videos will start playing automatically.
-            loop: If True, the videos will loop when they finish.
-            interactive: If False, the component will be in display-only mode.
+            value: A tuple of two video file paths or URLs to display initially. Can also be a callable.
+            height: The height of the component container in pixels.
+            width: The width of the component container in pixels.
+            label: The label for this component that appears above it.
+            every: If `value` is a callable, run the function 'every' seconds while the client connection is open.
+            show_label: If False, the label is not displayed.
+            container: If False, the component will not be wrapped in a container.
+            scale: An integer that defines the component's relative size in a layout.
+            min_width: The minimum width of the component in pixels.
+            interactive: If True, the component is in input mode (upload). If False, it's in display-only mode.
+            visible: If False, the component is not rendered.
+            elem_id: An optional string that is assigned as the id of the component in the HTML.
+            elem_classes: An optional list of strings that are assigned as the classes of the component in the HTML.
+            position: The initial horizontal position of the slider, from 0 (left) to 100 (right).
+            show_download_button: If True, a download button is shown for the second video.
+            show_mute_button: If True, a mute/unmute button is shown.
+            show_fullscreen_button: If True, a fullscreen button is shown.
+            video_mode: The mode of the component, either "upload" or "preview".
+            autoplay: If True, videos will start playing automatically on load (muted).
+            loop: If True, videos will loop when they finish playing.
         """
         self.height = height
         self.width = width
         self.position = position
         self.show_download_button = show_download_button
         self.show_fullscreen_button = show_fullscreen_button
+        self.show_mute_button = show_mute_button
+        self.video_mode = video_mode
         self.autoplay = autoplay
         self.loop = loop
-        self.type = "filepath" # The component handles file paths.
+        # The component's value is processed as file paths.
+        self.type = "filepath"
         
         super().__init__(
             label=label,
@@ -94,8 +111,7 @@ class VideoSlider(Component):
 
     def preprocess(self, payload: VideoSliderData | None) -> VideoSliderValue | None:
         """
-        Processes data from the frontend into a format usable by a Python function.
-        It converts the FileData objects into a tuple of simple string file paths.
+        Converts data from the frontend (as FileData) to a format usable by a Python function (a tuple of file paths).
         """
         if payload is None or payload.root is None:
             return None
@@ -109,9 +125,8 @@ class VideoSlider(Component):
 
     def postprocess(self, value: VideoSliderValue | None) -> VideoSliderData | None:
         """
-        Processes data returned from a Python function into a format for the frontend.
-        It takes a tuple of file paths, makes them servable by Gradio, and returns
-        a VideoSliderData object.
+        Converts data from a Python function (a tuple of file paths) into a format for the frontend (FileData).
+        This involves making the local files servable by Gradio.
         """
         if value is None or (value[0] is None and value[1] is None):
             return None
@@ -120,7 +135,7 @@ class VideoSlider(Component):
         
         fd1 = None
         if video1_path:
-            # Copies the file to a temp cache and returns a FileData object.
+            # Copies the file to a temporary cache and creates a FileData object.
             new_path = processing_utils.move_resource_to_block_cache(video1_path, self)
             fd1 = FileData(path=str(new_path))
 
@@ -133,7 +148,7 @@ class VideoSlider(Component):
         
     def api_info(self) -> dict[str, Any]:
         """
-        Provides API information for the component.
+        Provides type information for the component's API documentation.
         """
         return {"type": "array", "items": {"type": "string", "description": "path to video file"}, "length": 2}
 

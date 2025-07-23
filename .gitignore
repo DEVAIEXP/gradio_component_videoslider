@@ -1,4 +1,5 @@
 .eggs/
+.vscode/
 dist/
 *.pyc
 __pycache__/
@@ -10,3 +11,4 @@ __tmp/*
 .ruff_cache
 node_modules
 backend/**/templates/
+README_TEMPLATE.md

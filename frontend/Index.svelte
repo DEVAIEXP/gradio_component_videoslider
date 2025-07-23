@@ -1,16 +1,16 @@
 <!-- videoslider/frontend/Index.svelte -->
-<!-- Enable programmatic access to the component's props from outside. -->
 <svelte:options accessors={true} />
 
 <script lang="ts">
-	// Import Gradio types and common components.
+	// Svelte and Gradio imports
+	import { tick } from "svelte";
 	import type { Gradio } from "@gradio/utils";
 	import { Block } from "@gradio/atoms";
 	import { StatusTracker } from "@gradio/statustracker";
 	import type { FileData } from "@gradio/client";
 	import type { LoadingStatus } from "@gradio/statustracker";
 	
-	// Import the two main views for this component.
+	// Local component imports
 	import VideoSliderPreview from "./shared/VideoSliderPreview.svelte";
 	import InteractiveVideoSlider from "./shared/InteractiveVideoSlider.svelte";
 
@@ -31,10 +31,12 @@
 	export let scale: number | null = null;
 	export let min_width: number | undefined = undefined;
 	export let loading_status: LoadingStatus;
-	/** If false, the component is in display-only mode. */
 	export let interactive: boolean;
 	export let show_download_button: boolean;
 	export let show_fullscreen_button: boolean;
+	export let show_mute_button: boolean;
+	/** Determines whether to show the upload interface or the preview player. */
+	export let video_mode: "upload" | "preview" = "preview";
 	/** The initial position of the slider, from 0 to 100. */
 	export let position: number;
 	export let autoplay: boolean;
@@ -56,11 +58,12 @@
 	let old_value: [FileData | null, FileData | null] = [null, null];
 	/** Tracks if the user is dragging over the upload area. */
 	let dragging = false;
-	
+
 	// -----------------
 	// Reactive Logic
 	// -----------------
-	/** Converts the 0-100 position from Python to a 0-1 scale for CSS. */
+
+	/** Converts the 0-100 position from Python to a 0-1 scale for the child component. */
 	$: normalised_slider_position = Math.max(0, Math.min(100, position)) / 100;
 
 	/** Dispatches a 'change' event whenever the `value` prop is updated from within the component. */
@@ -70,17 +73,24 @@
 			gradio.dispatch("change");
 		}
 	}
+
+	/**
+	 * Handles the fullscreen event from the child component.
+	 * It updates the internal state and resets the slider position to the center.
+	 * @param detail The new fullscreen state (true or false).
+	 */
+	function handle_fullscreen_change(detail: boolean) {
+		fullscreen = detail;
+		position = 50; // Center the slider on fullscreen change
+		tick().then(() => gradio.dispatch("change"));
+	}
 </script>
 
-<!-- 
-	This block acts as a router. 
-	It displays one of two sub-components based on the `interactive` prop from the backend.
--->
-{#if !interactive}
-	<!-- Static/Output Mode: Shows the side-by-side video player with a slider. -->
+{#if video_mode=="preview"}
 	<Block
 		{visible}
 		variant={"solid"}
+		border_mode={dragging ? "focus" : "base"}
 		padding={false}
 		{elem_id}
 		{elem_classes}
@@ -100,22 +110,23 @@
 		<VideoSliderPreview
 			bind:value
 			{interactive}
+            {fullscreen}
 			{label}
 			{show_label}
 			{show_download_button}
 			{show_fullscreen_button}
+			{show_mute_button}
 			i18n={gradio.i18n}
-			position={normalised_slider_position}
+			bind:position={normalised_slider_position}
 			slider_color="var(--border-color-primary)"
 			on:clear={() => gradio.dispatch("clear")}
-			on:fullscreen={({ detail }) => { fullscreen = detail; }}
+			on:fullscreen={({ detail }) => handle_fullscreen_change(detail)}
 			{autoplay}
 			{loop}
 			upload={(...args) => gradio.client.upload(...args)}
 		/>
 	</Block>
 {:else}
-	<!-- Interactive/Input Mode: Shows two upload boxes for the user to add videos. -->
 	<Block
 		{visible}
 		variant={"solid"}
@@ -145,10 +156,10 @@
 			{show_label}
 			max_file_size={gradio.max_file_size}
 			i18n={gradio.i18n}
-			upload={(...args) => gradio.client.upload(...args)}	
-			stream_handler={gradio.client?.stream} 		
+			upload={(...args) => gradio.client.upload(...args)}
+			stream_handler={gradio.client?.stream}
 			{autoplay}
-			{loop}			
+			{loop}
 		/>
 	</Block>
 {/if}

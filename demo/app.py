@@ -1,4 +1,3 @@
-# In demo/app.py
 import gradio as gr
 from gradio_videoslider import VideoSlider
 import os
@@ -8,8 +7,8 @@ import os
 # IMPORTANT: Replace the values below with the paths to YOUR video files.
 #
 # Option A: Relative Path (if the video is in the same folder as this app.py)
-# video_path_1 = "video_antes.mp4"
-# video_path_2 = "video_depois.mp4"
+# video_path_1 = "video_before.mp4"
+# video_path_2 = "video_after.mp4"
 #
 # Option B: Absolute Path (the full path to the file on your computer)
 # Example for Windows:
@@ -19,11 +18,11 @@ import os
 # video_path_1 = "/home/yourname/videos/my_video_1.mp4"
 
 # Set your file paths here:
-video_path_1 = "src/examples/Samplevideo 720x480.mp4"
-video_path_2 = "src/examples/SampleVideo 1280x720.mp4"
+video_path_1 = "examples/SampleVideo 720x480.mp4"
+video_path_2 = "examples/SampleVideo 1280x720.mp4"
 
 
-# --- 2. FUNCTION FOR THE UPLOAD EXAMPLE (remains the same) ---
+# --- 2. FUNCTION FOR THE UPLOAD EXAMPLE ---
 def process_uploaded_videos(video_inputs):
     """This function handles the uploaded videos."""
     print("Received videos from upload:", video_inputs)
@@ -39,11 +38,13 @@ with gr.Blocks() as demo:
         # --- TAB 1: UPLOAD EXAMPLE ---
         with gr.TabItem("1. Compare via Upload"):
             gr.Markdown("## Upload two videos to compare them side-by-side.")
-            video_slider_input = VideoSlider(label="Your Videos", height=400, width=700)
+            video_slider_input = VideoSlider(label="Your Videos", height=400, width=700, video_mode="upload")
             video_slider_output = VideoSlider(
                 label="Video comparision",
                 interactive=False,
-                autoplay=True,
+                autoplay=True,                
+                video_mode="preview",
+                show_download_button=False,
                 loop=True,
                 height=400,
                 width=700
@@ -64,13 +65,15 @@ with gr.Blocks() as demo:
                 label="Video comparision",
                 value=(video_path_1, video_path_2),
                 interactive=False,
+                show_download_button=False,
                 autoplay=True,
+                video_mode="preview",
                 loop=True,
                 height=400,
                 width=700
             )
 
-# Optional: A check to give a helpful error message if files are not found.
+# A check to give a helpful error message if files are not found.
 if not os.path.exists(video_path_1) or not os.path.exists(video_path_2):
     print("---")
     print(f"WARNING: Could not find one or both video files.")
@@ -80,4 +83,4 @@ if not os.path.exists(video_path_1) or not os.path.exists(video_path_2):
     print("---")
 
 if __name__ == '__main__':
-    demo.launch()
+    demo.launch(debug=True)

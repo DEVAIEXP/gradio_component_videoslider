@@ -8,12 +8,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gradio_videoslider"
-version = "0.0.1"
+version = "0.0.2"
 description = "VideoSlider Component for Gradio"
 readme = "README.md"
 license = "apache-2.0"
 requires-python = ">=3.10"
-authors = [{ name = "YOUR NAME", email = "YOUREMAIL@domain.com" }]
+authors = [{ name = "Eliseu Silva", email = "elismasilva@gmail.com" }]
 keywords = ["gradio-custom-component", "gradio-template-ImageSlider"]
 # Add dependencies here
 dependencies = ["gradio>=4.0,<6.0"]

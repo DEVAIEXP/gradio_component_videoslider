@@ -12,7 +12,16 @@ app_file: space.py
 # `gradio_videoslider`
 <a href="https://pypi.org/project/gradio_videoslider/" target="_blank"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/gradio_videoslider"></a>  
 
-VideoSlider Component for Gradio
+An interactive component for Gradio to compare two videos side-by-side with a draggable slider.
+
+## Features
+
+- **Side-by-Side Comparison**: Display two videos in the same component, perfect for showing "before and after" results.
+- **Interactive Slider**: A draggable vertical slider allows users to intuitively compare the two videos.
+- **Synchronized Playback**: Clicking on the component plays or pauses both videos simultaneously, keeping them in sync.
+- **Input and Output**: Use it as an input field for users to upload two videos, or as an output to display results from your function.
+- **Standard Video Controls**: Includes autoplay, looping properties, mute/unmute, fullscreen toggle, and a download button.
+- **Flexible Loading**: Load videos from local file paths or remote URLs directly into the component.
 
 ## Installation
 
@@ -23,7 +32,6 @@ pip install gradio_videoslider
 ## Usage
 
 ```python
-# In demo/app.py
 import gradio as gr
 from gradio_videoslider import VideoSlider
 import os
@@ -33,8 +41,8 @@ import os
 # IMPORTANT: Replace the values below with the paths to YOUR video files.
 #
 # Option A: Relative Path (if the video is in the same folder as this app.py)
-# video_path_1 = "video_antes.mp4"
-# video_path_2 = "video_depois.mp4"
+# video_path_1 = "video_before.mp4"
+# video_path_2 = "video_after.mp4"
 #
 # Option B: Absolute Path (the full path to the file on your computer)
 # Example for Windows:
@@ -44,11 +52,11 @@ import os
 # video_path_1 = "/home/yourname/videos/my_video_1.mp4"
 
 # Set your file paths here:
-video_path_1 = "src/examples/Samplevideo 720x480.mp4"
-video_path_2 = "src/examples/SampleVideo 1280x720.mp4"
+video_path_1 = "examples/SampleVideo 720x480.mp4"
+video_path_2 = "examples/SampleVideo 1280x720.mp4"
 
 
-# --- 2. FUNCTION FOR THE UPLOAD EXAMPLE (remains the same) ---
+# --- 2. FUNCTION FOR THE UPLOAD EXAMPLE ---
 def process_uploaded_videos(video_inputs):
     """This function handles the uploaded videos."""
     print("Received videos from upload:", video_inputs)
@@ -64,11 +72,13 @@ with gr.Blocks() as demo:
         # --- TAB 1: UPLOAD EXAMPLE ---
         with gr.TabItem("1. Compare via Upload"):
             gr.Markdown("## Upload two videos to compare them side-by-side.")
-            video_slider_input = VideoSlider(label="Your Videos", height=400, width=700)
+            video_slider_input = VideoSlider(label="Your Videos", height=400, width=700, video_mode="upload")
             video_slider_output = VideoSlider(
                 label="Video comparision",
                 interactive=False,
-                autoplay=True,
+                autoplay=True,                
+                video_mode="preview",
+                show_download_button=False,
                 loop=True,
                 height=400,
                 width=700
@@ -89,13 +99,15 @@ with gr.Blocks() as demo:
                 label="Video comparision",
                 value=(video_path_1, video_path_2),
                 interactive=False,
+                show_download_button=False,
                 autoplay=True,
+                video_mode="preview",
                 loop=True,
                 height=400,
                 width=700
             )
 
-# Optional: A check to give a helpful error message if files are not found.
+# A check to give a helpful error message if files are not found.
 if not os.path.exists(video_path_1) or not os.path.exists(video_path_2):
     print("---")
     print(f"WARNING: Could not find one or both video files.")
@@ -105,7 +117,7 @@ if not os.path.exists(video_path_1) or not os.path.exists(video_path_2):
     print("---")
 
 if __name__ == '__main__':
-    demo.launch()
+    demo.launch(debug=True)
 
 ```
 
@@ -143,7 +155,7 @@ typing.Union[
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">A tuple of two video file paths or URLs to display initially.</td>
+<td align="left">A tuple of two video file paths or URLs to display initially. Can also be a callable.</td>
 </tr>
 
 <tr>
@@ -156,7 +168,7 @@ int | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">The height of the component in pixels.</td>
+<td align="left">The height of the component container in pixels.</td>
 </tr>
 
 <tr>
@@ -169,7 +181,7 @@ int | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">The width of the component in pixels.</td>
+<td align="left">The width of the component container in pixels.</td>
 </tr>
 
 <tr>
@@ -182,7 +194,7 @@ str | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">The label for this component.</td>
+<td align="left">The label for this component that appears above it.</td>
 </tr>
 
 <tr>
@@ -195,7 +207,7 @@ float | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">None</td>
+<td align="left">If `value` is a callable, run the function 'every' seconds while the client connection is open.</td>
 </tr>
 
 <tr>
@@ -208,7 +220,7 @@ bool | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">None</td>
+<td align="left">If False, the label is not displayed.</td>
 </tr>
 
 <tr>
@@ -221,7 +233,7 @@ bool
 
 </td>
 <td align="left"><code>True</code></td>
-<td align="left">None</td>
+<td align="left">If False, the component will not be wrapped in a container.</td>
 </tr>
 
 <tr>
@@ -234,7 +246,7 @@ int | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">None</td>
+<td align="left">An integer that defines the component's relative size in a layout.</td>
 </tr>
 
 <tr>
@@ -247,7 +259,7 @@ int
 
 </td>
 <td align="left"><code>160</code></td>
-<td align="left">None</td>
+<td align="left">The minimum width of the component in pixels.</td>
 </tr>
 
 <tr>
@@ -260,7 +272,7 @@ bool | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">If False, the component will be in display-only mode.</td>
+<td align="left">If True, the component is in input mode (upload). If False, it's in display-only mode.</td>
 </tr>
 
 <tr>
@@ -273,7 +285,7 @@ bool
 
 </td>
 <td align="left"><code>True</code></td>
-<td align="left">None</td>
+<td align="left">If False, the component is not rendered.</td>
 </tr>
 
 <tr>
@@ -286,7 +298,7 @@ str | None
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">None</td>
+<td align="left">An optional string that is assigned as the id of the component in the HTML.</td>
 </tr>
 
 <tr>
@@ -301,7 +313,7 @@ typing.Union[typing.List[str], str, NoneType][
 
 </td>
 <td align="left"><code>None</code></td>
-<td align="left">None</td>
+<td align="left">An optional list of strings that are assigned as the classes of the component in the HTML.</td>
 </tr>
 
 <tr>
@@ -314,7 +326,7 @@ int
 
 </td>
 <td align="left"><code>50</code></td>
-<td align="left">The initial position of the slider, from 0 to 100.</td>
+<td align="left">The initial horizontal position of the slider, from 0 (left) to 100 (right).</td>
 </tr>
 
 <tr>
@@ -327,7 +339,20 @@ bool
 
 </td>
 <td align="left"><code>True</code></td>
-<td align="left">None</td>
+<td align="left">If True, a download button is shown for the second video.</td>
+</tr>
+
+<tr>
+<td align="left"><code>show_mute_button</code></td>
+<td align="left" style="width: 25%;">
+
+```python
+bool
+```
+
+</td>
+<td align="left"><code>True</code></td>
+<td align="left">If True, a mute/unmute button is shown.</td>
 </tr>
 
 <tr>
@@ -340,7 +365,20 @@ bool
 
 </td>
 <td align="left"><code>True</code></td>
-<td align="left">None</td>
+<td align="left">If True, a fullscreen button is shown.</td>
+</tr>
+
+<tr>
+<td align="left"><code>video_mode</code></td>
+<td align="left" style="width: 25%;">
+
+```python
+"upload" | "preview"
+```
+
+</td>
+<td align="left"><code>"preview"</code></td>
+<td align="left">The mode of the component, either "upload" or "preview".</td>
 </tr>
 
 <tr>
@@ -353,7 +391,7 @@ bool
 
 </td>
 <td align="left"><code>False</code></td>
-<td align="left">If True, the videos will start playing automatically.</td>
+<td align="left">If True, videos will start playing automatically on load (muted).</td>
 </tr>
 
 <tr>
@@ -366,7 +404,7 @@ bool
 
 </td>
 <td align="left"><code>False</code></td>
-<td align="left">If True, the videos will loop when they finish.</td>
+<td align="left">If True, videos will loop when they finish playing.</td>
 </tr>
 </tbody></table>
 

@@ -33,7 +33,7 @@ It's a building block for more complex components like the InteractiveVideoSlide
 	export let show_label = true;
 	export let webcam_options: WebcamOptions;
 	export let include_audio: boolean;
-	export let autoplay: boolean;
+	export const autoplay = undefined
 	export let root: string;
 	export let i18n: I18nFormatter;
 	/** The currently selected input source. */
