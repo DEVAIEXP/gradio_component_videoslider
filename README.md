@@ -14,6 +14,8 @@ app_file: space.py
 
 An interactive component for Gradio to compare two videos side-by-side with a draggable slider.
 
+<img src="https://huggingface.co/datasets/DEVAIEXP/assets/resolve/main/VideoSliderShot.PNG" alt="VideoSlider Component for Gradio">
+
 ## Features
 
 - **Side-by-Side Comparison**: Display two videos in the same component, perfect for showing "before and after" results.
